@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC 單字測驗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .question-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .word-display {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            flex: 1;
+        }
+
+        .speak-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .speak-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .speak-btn:active {
+            transform: scale(0.95);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.05em;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-submit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-refresh {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-refresh:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border-left: 5px solid #ddd;
+        }
+
+        .result-item.correct {
+            border-left-color: #28a745;
+        }
+
+        .result-item.incorrect {
+            border-left-color: #dc3545;
+        }
+
+        .result-word {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .result-status.correct {
+            background: #28a745;
+            color: white;
+        }
+
+        .result-status.incorrect {
+            background: #dc3545;
+            color: white;
+        }
+
+        .result-details {
+            margin-top: 15px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .result-details p {
+            margin-bottom: 10px;
+        }
+
+        .example-sentence {
+            font-style: italic;
+            color: #667eea;
+            background: #f0f4ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #764ba2;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .options {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 TOEIC 單字測驗</h1>
+        
+        <div id="loading" class="loading">
+            載入中...
+        </div>
+
+        <div id="quiz-container" class="hidden">
+            <!-- 測驗題目將動態生成 -->
+        </div>
+
+        <div class="buttons">
+            <button id="submit-btn" class="btn btn-submit" onclick="submitQuiz()" disabled>提交答案</button>
+            <button id="refresh-btn" class="btn btn-refresh" onclick="refreshQuiz()">🔄 重新測驗</button>
+        </div>
+
+        <div id="results" class="results hidden">
+            <!-- 結果將顯示在這裡 -->
+        </div>
+    </div>
+
+    <script>
+        let currentQuiz = [];
+        let userAnswers = [];
+
+        // 頁面載入時初始化
+        window.onload = async function() {
+            await loadVocabulary();
+            await generateNewQuiz();
+        };
+
+        // 載入單字資料
+        async function loadVocabulary() {
+            try {
+                const response = await fetch('/api/load-vocab');
+                const data = await response.json();
+                console.log(`已載入 ${data.count} 個單字`);
+            } catch (error) {
+                console.error('載入單字失敗:', error);
+                alert('載入單字失敗，請檢查 PDF 檔案');
+            }
+        }
+
+        // 生成新測驗
+        async function generateNewQuiz() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('submit-btn').disabled = true;
+
+            try {
+                const response = await fetch('/api/generate-quiz');
+                const data = await response.json();
+                currentQuiz = data.questions;
+                userAnswers = new Array(currentQuiz.length).fill('');
+                
+                displayQuiz();
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('quiz-container').classList.remove('hidden');
+            } catch (error) {
+                console.error('生成測驗失敗:', error);
+                alert('生成測驗失敗');
+            }
+        }
+
+        // 顯示測驗
+        function displayQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+
+            currentQuiz.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                
+                questionDiv.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-number">${index + 1}</div>
+                        <div class="word-display">${question.word}</div>
+                        <button class="speak-btn" onclick="speakWord('${question.word}')">
+                            🔊 發音
+                        </button>
+                    </div>
+                    <div class="options">
+                        ${question.options.map((option, optIndex) => `
+                            <div class="option" onclick="selectOption(${index}, '${option.replace(/'/g, "\\'")}')">
+                                ${String.fromCharCode(65 + optIndex)}. ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(questionDiv);
+            });
+        }
+
+        // 選擇答案
+        function selectOption(questionIndex, answer) {
+            userAnswers[questionIndex] = answer;
+            
+            // 更新視覺效果
+            const questionContainer = document.querySelectorAll('.question-container')[questionIndex];
+            const options = questionContainer.querySelectorAll('.option');
+            
+            options.forEach(option => {
+                option.classList.remove('selected');
+                if (option.textContent.includes(answer)) {
+                    option.classList.add('selected');
+                }
+            });
+
+            // 檢查是否所有題目都已作答
+            checkAllAnswered();
+        }
+
+        // 檢查是否所有題目都已作答
+        function checkAllAnswered() {
+            const allAnswered = userAnswers.every(answer => answer !== '');
+            document.getElementById('submit-btn').disabled = !allAnswered;
+        }
+
+        // 發音功能
+        function speakWord(word) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('您的瀏覽器不支援語音功能');
+            }
+        }
+
+        // 提交測驗
+        async function submitQuiz() {
+            const words = currentQuiz.map(q => q.word);
+            
+            try {
+                const response = await fetch('/api/submit-quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        answers: userAnswers,
+                        words: words
+                    })
+                });
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('提交測驗失敗:', error);
+                alert('提交測驗失敗');
+            }
+        }
+
+        // 顯示結果
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            const scoreDisplay = document.createElement('div');
+            scoreDisplay.className = 'score-display';
+            const percentage = Math.round((data.score / data.total) * 100);
+            scoreDisplay.innerHTML = `
+                得分: ${data.score} / ${data.total} (${percentage}%)
+            `;
+            resultsDiv.appendChild(scoreDisplay);
+
+            data.results.forEach((result, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = `result-item ${result.is_correct ? 'correct' : 'incorrect'}`;
+                
+                resultItem.innerHTML = `
+                    <div class="result-word">
+                        ${index + 1}. ${result.word}
+                        <span class="result-status ${result.is_correct ? 'correct' : 'incorrect'}">
+                            ${result.is_correct ? '✓ 正確' : '✗ 錯誤'}
+                        </span>
+                    </div>
+                    <div class="result-details">
+                        ${!result.is_correct ? `<p><strong>你的答案:</strong> ${result.user_answer}</p>` : ''}
+                        <p><strong>正確答案:</strong> ${result.correct_answer}</p>
+                        <p><strong>解釋:</strong> ${result.explanation}</p>
+                        <div class="example-sentence">
+                            <strong>例句:</strong> ${result.example_sentence}
+                        </div>
+                    </div>
+                `;
+                
+                resultsDiv.appendChild(resultItem);
+            });
+
+            resultsDiv.classList.remove('hidden');
+            
+            // 滾動到結果區域
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 重新測驗
+        function refreshQuiz() {
+            generateNewQuiz();
+        }
+    </script>
+</body>
+</html>

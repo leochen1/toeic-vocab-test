@@ -1,0 +1,21 @@
+# Git 快速命令腳本
+
+# 初次上傳到 GitHub（請先在 GitHub 建立儲存庫）
+
+# 1. 添加所有檔案
+git add .
+
+# 2. 提交變更
+git commit -m "Initial commit - TOEIC Vocab Test Application"
+
+# 3. 連接到 GitHub（請替換 YOUR_USERNAME 為你的 GitHub 帳號）
+# git remote add origin https://github.com/YOUR_USERNAME/toeic-vocab-test.git
+
+# 4. 推送到 GitHub
+# git branch -M main
+# git push -u origin main
+
+# 之後更新程式碼時使用：
+# git add .
+# git commit -m "更新說明"
+# git push
