@@ -156,8 +156,11 @@ class ToeicVocabExtractor:
         # 使用預設模板
         return random.choice(templates['default'])
 
-# 初始化提取器
+# 初始化提取器並載入單字
 extractor = ToeicVocabExtractor()
+print("Initializing vocabulary database...")
+extractor.load_all_vocab()
+print(f"Vocabulary loaded: {len(extractor.vocab_data)} words")
 
 @app.route('/')
 def index():
@@ -165,9 +168,8 @@ def index():
 
 @app.route('/api/load-vocab', methods=['GET'])
 def load_vocab():
-    """載入單字資料"""
-    count = extractor.load_all_vocab()
-    return jsonify({'status': 'success', 'count': count})
+    """返回已載入的單字數量"""
+    return jsonify({'status': 'success', 'count': len(extractor.vocab_data)})
 
 @app.route('/api/generate-quiz', methods=['GET'])
 def generate_quiz():
@@ -223,10 +225,6 @@ def submit_quiz():
     })
 
 if __name__ == '__main__':
-    # 啟動時載入單字
-    print("Loading vocabulary from PDFs...")
-    extractor.load_all_vocab()
-    
     # 雲端部署時使用環境變數設定 port
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
